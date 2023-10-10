@@ -11,7 +11,7 @@
             "@type": "Blog",
             "@id": "{url entity='module' name='mdn_blog' controller='home' params = ['page' => null]}",
             "mainEntityOfPage": "{url entity='module' name='mdn_blog' controller='home' params = ['page' => null]}",
-            "name": "{$root.meta_name}",
+            "name": "{$root.meta_title}",
             "description": "{$root.meta_description}",
             "publisher": {
                 "@type":"Organization",
