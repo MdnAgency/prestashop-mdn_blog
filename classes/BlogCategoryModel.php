@@ -63,6 +63,9 @@ class BlogCategoryModel extends ObjectModel
             PRIMARY KEY (`id`, `id_lang`) 
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
 
+        $result = Db::getInstance()->execute($sq1)
+            && Db::getInstance()->execute($sq3);
+
         // Category Mock Data
         foreach (Shop::getShops(true, null, true) as $shop_id) {
             if (Db::getInstance()->getValue("SELECT 'x' FROM  `" . self::getTableName() . "` WHERE id = 0 AND id_shop = '$shop_id'") == null) {
@@ -77,10 +80,7 @@ class BlogCategoryModel extends ObjectModel
                     )");
                 }
             }
-        }
-
-        $result = Db::getInstance()->execute($sq1)
-            && Db::getInstance()->execute($sq3);
+        } 
 
         return $result;
     }
