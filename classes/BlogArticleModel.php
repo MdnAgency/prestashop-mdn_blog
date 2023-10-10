@@ -212,10 +212,12 @@ class BlogArticleModel extends ObjectModel
     function updateProductCategory($listing) {
         Db::getInstance()->query("DELETE FROM ".self::getTableName() . '_product_cat'." WHERE (`id_article`) = '".$this->id."'");
 
-        // Insert
-        foreach ($listing as $value) {
-            Db::getInstance()->query("INSERT INTO ".self::getTableName() . '_product_cat'." (`id_article`, `id_product_cat`) 
-                VALUES ('".$this->id."', '".((int) $value)."')");
+        if(is_array($listing)) {
+            // Insert
+            foreach ($listing as $value) {
+                Db::getInstance()->query("INSERT INTO " . self::getTableName() . '_product_cat' . " (`id_article`, `id_product_cat`) 
+                VALUES ('" . $this->id . "', '" . ((int)$value) . "')");
+            }
         }
     }
 
