@@ -15,7 +15,8 @@ class AdminBlogArticleController extends ModuleAdminController
         $this->identifier = BlogArticleModel::$definition['primary']; //Clé primaire de l'objet
         $this->className = BlogArticleModel::class; //Classe de l'objet
         $this->bootstrap = true;
-        $this->lang = true;
+        $this->multiple_fieldsets = true;
+        $this->module->lang = true;
         //Liste des champs de l'objet à afficher dans la liste
         $this->fields_list = [
             'id' => [
@@ -88,11 +89,22 @@ class AdminBlogArticleController extends ModuleAdminController
         parent::postProcess();
     }
 
+    public function afterAdd($object)
+    {
+        $this->__updateCategories($object);
+        return parent::afterAdd($object);
+    }
+
     protected function afterUpdate($object)
     {
-        if($this->object) {
+        $this->__updateCategories($object);
+        return parent::afterUpdate($object);
+    }
+
+    private function __updateCategories($object) {
+        if($object) {
             // We update the product category table
-            $this->object->updateProductCategory(Tools::getValue("related_categories"));
+            $object->updateProductCategory(Tools::getValue("related_categories"));
 
             // We update the blog categories for current article
             $blog_categories = [];
@@ -103,13 +115,23 @@ class AdminBlogArticleController extends ModuleAdminController
                     $blog_categories[] = $last;
                 }
             }
-            $this->object->updateBlogCategories($blog_categories);
+            $object->updateBlogCategories($blog_categories);
         }
     }
 
+    /**
+     * Gestion Post Date or Anti Date
+     * @param $object
+     * @return bool
+     */
     protected function beforeAdd($object)
     {
-        $object->date = date("Y-m-d H:i:s");
+        if(Tools::getValue("post_date")) {
+            $object->date = Tools::getValue("post_date");
+        }
+        else {
+            $object->date = date("Y-m-d H:i:s");
+        }
         return parent::beforeAdd($object);
     }
 
@@ -119,7 +141,7 @@ class AdminBlogArticleController extends ModuleAdminController
         $blog_categories = $this->object->getBlogCategories();
 
         //Définition du formulaire d'édition
-        $this->fields_form = [
+        $this->fields_form[0]['form'] = [
             //Entête
             'legend' => [
                 'title' => $this->module->l('Article'),
@@ -128,19 +150,88 @@ class AdminBlogArticleController extends ModuleAdminController
             //Champs
             'input' => array_merge([
                 [
-                    'label' => ('Name'),
+                    'label' => $this->module->l('Article Title'),
                     'type' => 'text',
                     'name' => 'name',
                     'required' => true,
                     'lang' => true,
                 ],
                 [
-                    'label' => ('Slug'),
+                    'label' => $this->module->l('Slug'),
                     'type' => 'text',
                     'name' => 'slug',
                     'required' => true,
                     'lang' => true,
                 ],
+                [
+                    'type' => 'file',
+                    'label' => $this->module->l('Thumbnail'),
+                    'name' => 'thumbnail',
+                    'size' => 200,
+                    'required' => false,
+                    'lang' => true
+                ],
+                [
+                    'label' => $this->module->l('Short Description'),
+                    'type' => 'textarea',
+                    'name' => 'description',
+                    'required' => false,
+                    'lang' => true, //Flag pour utilisation des langues
+                    'rows' => 5,
+                    'cols' => 40,
+                ],
+                [
+                    'label' => $this->module->l('Article Content'),
+                    'type' => 'textarea',
+                    'name' => 'article',
+                    'required' => false,
+                    'lang' => true, //Flag pour utilisation des langues
+                    'rows' => 5,
+                    'cols' => 40,
+                    'autoload_rte' => true,
+                    "desc" => "Shortcodes : 
+                        <br/><span style='color: #a24c4c'>[product]</span>id_product,id_product2,...<span style='color: #a24c4c'>[/product]</span> : Show list of products
+                        <br/><span style='color: #a24c4c'>[category]</span>id_category,id_category,...<span style='color: #a24c4c'>[/category]</span> : Show list of categories
+                        "
+                ],
+                [
+                    'type'  => 'datetime',
+                    'label' => $this->module->l('Post-dater ou anti-dater'),
+                    'name'  => 'post_date',
+                    'desc'  => $this->module->l('Laissez vide pour publier directement, ou mettez une date au choix pour sortir dans le passé, ou dans le futur cet article'),
+                    'lang'  => false,
+                ],
+                array(
+                    'type' => 'select',
+                    'label' => ('Actif'),
+                    'name' => 'active',
+                    'required' => true,
+                    'options' => array(
+                        'query' => $options = array(
+                            array(
+                                'id_option' => 1,
+                                'name' => 'Oui',
+                            ),
+                            array(
+                                'id_option' => 0,
+                                'name' => 'Non',
+                            ),
+                        ),
+                        'id' => 'id_option',
+                        'name' => 'name',
+                    ),
+                ),
+            ])
+        ];
+
+        $this->fields_form[1]['form'] = [
+            //Entête
+            'legend' => [
+                'title' => $this->module->l('Categories'),
+                'icon' => 'icon-cog'
+            ],
+            //Champs
+            'input' => array_merge([
                 array(
                     'type' => 'select',
                     'label' => $this->module->l('Main category'),
@@ -160,7 +251,7 @@ class AdminBlogArticleController extends ModuleAdminController
                 ),
                 [
                     'type' => 'checkbox',
-                    'label' => $this->module->l('Categories'),
+                    'label' => $this->module->l('Other Categories'),
                     'helper' => $this->module->l('Categories of this blog article'),
                     'name' => 'blog_categories',
                     'values' => array(
@@ -175,101 +266,63 @@ class AdminBlogArticleController extends ModuleAdminController
                     ),
                 ],
                 [
-                    'type' => 'file',
-                    'label' => 'Miniature',
-                    'name' => 'thumbnail',
-                    'size' => 200,
-                    'required' => true,
-                    'lang' => true
-                ],
-                [
-                    'label' => ('Description / résumé'),
-                    'type' => 'textarea',
-                    'name' => 'description',
-                    'required' => false,
-                    'lang' => true, //Flag pour utilisation des langues
-                    'rows' => 5,
-                    'cols' => 40,
-                ],
-                [
-                    'label' => ('Contenu de l\'article'),
-                    'type' => 'textarea',
-                    'name' => 'article',
-                    'required' => false,
-                    'lang' => true, //Flag pour utilisation des langues
-                    'rows' => 5,
-                    'cols' => 40,
-                    'autoload_rte' => true,
-                    "desc" => "Shortcodes : 
-                        <br/><span style='color: #a24c4c'>[product]</span>id_product,id_product2,...<span style='color: #a24c4c'>[/product]</span> : Show list of products
-                        <br/><span style='color: #a24c4c'>[category]</span>id_category,id_category,...<span style='color: #a24c4c'>[/category]</span> : Show list of categories
-                        "
-                ],
-                [
-                    'type'  => 'text',
-                    'label' => $this->l('Meta Title'),
-                    'name'  => 'meta_title',
-                    'desc'  => $this->l('Enter Your Category Meta Title for SEO'),
-                    'lang'  => true,
-                ],
-                [
-                    'type'  => 'textarea',
-                    'label' => $this->l('Meta Description'),
-                    'name'  => 'meta_description',
-                    'desc'  => $this->l('Enter Your Category Meta Description for SEO'),
-                    'lang'  => true,
-                ],
-                [
-                    'type'  => 'tags',
-                    'label' => $this->l('Meta Keyword'),
-                    'name'  => 'meta_keywords',
-                    'desc'  => $this->l('Enter Your Category Meta Keyword for SEO. Seperate by comma(,)'),
-                    'lang'  => true,
-                ],
-                [
                     'type'  => 'categories',
-                    'label' => 'Catégories de produits liées',
+                    'label' => 'Linked products categories',
                     'name' => 'related_categories',
                     'tree' => [
                         'id' =>  'related_categories',
                         'use_checkbox' => true,
                         'selected_categories' => $selected_categories
                     ]
-                ] ,
-                array(
-                    'type' => 'select',
-                    'label' => ('Actif'),
-                    'name' => 'active',
-                    'required' => true,
-                    'options' => array(
-                        'query' => $options = array(
-                            array(
-                                'id_option' => 1,       // The value of the 'value' attribute of the <option> tag.
-                                'name' => 'Oui',    // The value of the text content of the  <option> tag.
-                            ),
-                            array(
-                                'id_option' => 0,
-                                'name' => 'Non',
-                            ),
-                        ),
-                        'id' => 'id_option',
-                        'name' => 'name',
-                    ),
-                ),
+                ],
+            ])
+        ];
+
+        $this->fields_form[2]['form'] = [
+            //Entête
+            'legend' => [
+                'title' => $this->module->l('SEO'),
+                'icon' => 'icon-cog'
+            ],
+            //Champs
+            'input' => array_merge([
+                [
+                    'type'  => 'text',
+                    'label' => $this->module->l('Meta Title'),
+                    'name'  => 'meta_title',
+                    'desc'  => $this->module->l('Enter Your Category Meta Title for SEO'),
+                    'lang'  => true,
+                ],
+                [
+                    'type'  => 'textarea',
+                    'label' => $this->module->l('Meta Description'),
+                    'name'  => 'meta_description',
+                    'desc'  => $this->module->l('Enter Your Category Meta Description for SEO'),
+                    'lang'  => true,
+                ],
+                [
+                    'type'  => 'tags',
+                    'label' => $this->module->l('Meta Keyword'),
+                    'name'  => 'meta_keywords',
+                    'desc'  => $this->module->l('Enter Your Category Meta Keyword for SEO. Seperate by comma(,)'),
+                    'lang'  => true,
+                ],
             ]),
             //Boutton de soumission
             'submit' => [
                 'name' => 'slider',
-                'title' => $this->l('Save'), //On garde volontairement la traduction de l'admin par défaut
+                'title' => $this->module->l('Save'), //On garde volontairement la traduction de l'admin par défaut
             ]
         ];
 
+        // Default, article is visible
+        if($this->object->id == 0)
+            $this->fields_value['active'] = 1;
 
+        // Populate checked categories
         foreach ($this->object->getBlogCategories() as $cb) {
             $this->fields_value['blog_categories_'.$cb] = true;
         }
-
-
 
         return parent::renderForm();
     }

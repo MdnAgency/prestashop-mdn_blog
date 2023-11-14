@@ -168,7 +168,7 @@ class BlogArticleModel extends ObjectModel
         $request = Db::getInstance()->executeS("SELECT p.id FROM ".self::getTableName()." p
             ".($product_category_id !== null ? "JOIN ".(self::getTableName() . '_product_cat')." pc ON pc.id_article = p.id " : "")." 
             ".($category !== null ? "JOIN ".(self::getTableName() . '_cat')." pbc ON pbc.id_article = p.id " : "")." 
-            WHERE p.active = '1' 
+            WHERE p.active = '1' AND (p.date) < (NOW()) 
                 ".($product_category_id !== null ? "AND pc.id_product_cat = '".$product_category_id."'" : "")." 
                 ".($category !== null ? "AND pbc.id_category = '".$category."'" : "")."  
                 ".($article_id_exclude !== null ? "AND p.id NOT IN('".implode("','", $article_id_exclude)."')" : "")."  
@@ -212,10 +212,12 @@ class BlogArticleModel extends ObjectModel
     function updateProductCategory($listing) {
         Db::getInstance()->query("DELETE FROM ".self::getTableName() . '_product_cat'." WHERE (`id_article`) = '".$this->id."'");
 
-        // Insert
-        foreach ($listing as $value) {
-            Db::getInstance()->query("INSERT INTO ".self::getTableName() . '_product_cat'." (`id_article`, `id_product_cat`) 
-                VALUES ('".$this->id."', '".((int) $value)."')");
+        if(is_array($listing)) {
+            // Insert
+            foreach ($listing as $value) {
+                Db::getInstance()->query("INSERT INTO " . self::getTableName() . '_product_cat' . " (`id_article`, `id_product_cat`) 
+                VALUES ('" . $this->id . "', '" . ((int)$value) . "')");
+            }
         }
     }
 

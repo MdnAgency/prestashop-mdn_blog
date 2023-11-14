@@ -12,6 +12,7 @@ class AdminBlogCategoryController extends ModuleAdminController
         $this->identifier = BlogCategoryModel::$definition['primary']; //Clé primaire de l'objet
         $this->className = BlogCategoryModel::class; //Classe de l'objet
         $this->bootstrap = true;
+        $this->multiple_fieldsets = true;
         $this->lang = true;
         //Liste des champs de l'objet à afficher dans la liste
         $this->fields_list = [
@@ -57,10 +58,10 @@ class AdminBlogCategoryController extends ModuleAdminController
     public function renderForm()
     {
         //Définition du formulaire d'édition
-        $this->fields_form = [
+        $this->fields_form[0]['form'] = [
             //Entête
             'legend' => [
-                'title' => $this->module->l('Catégorie'),
+                'title' => $this->module->l('Contenu'),
                 'icon' => 'icon-cog'
             ],
             //Champs
@@ -107,27 +108,6 @@ class AdminBlogCategoryController extends ModuleAdminController
                     'cols' => 40,
                     'autoload_rte' => true,
                 ],
-                [
-                    'type'  => 'text',
-                    'label' => $this->l('Meta Title'),
-                    'name'  => 'meta_title',
-                    'desc'  => $this->l('Enter Your Category Meta Title for SEO'),
-                    'lang'  => true,
-                ],
-                [
-                    'type'  => 'textarea',
-                    'label' => $this->l('Meta Description'),
-                    'name'  => 'meta_description',
-                    'desc'  => $this->l('Enter Your Category Meta Description for SEO'),
-                    'lang'  => true,
-                ],
-                [
-                    'type'  => 'tags',
-                    'label' => $this->l('Meta Keyword'),
-                    'name'  => 'meta_keywords',
-                    'desc'  => $this->l('Enter Your Category Meta Keyword for SEO. Seperate by comma(,)'),
-                    'lang'  => true,
-                ],
                 array(
                     'type' => 'select',
                     'label' => ('Actif'),
@@ -149,12 +129,46 @@ class AdminBlogCategoryController extends ModuleAdminController
                     ),
                 ),
             ]),
-            //Boutton de soumission
+        ];
+        $this->fields_form[1]['form'] = [
+            //Entête
+            'legend' => [
+                'title' => $this->module->l('SEO'),
+                'icon' => 'icon-cog'
+            ],
+            'input' => [
+                [
+                    'type'  => 'text',
+                    'label' => $this->l('Meta Title'),
+                    'name'  => 'meta_title',
+                    'desc'  => $this->l('Enter Your Category Meta Title for SEO'),
+                    'lang'  => true,
+                ],
+                [
+                    'type'  => 'textarea',
+                    'label' => $this->l('Meta Description'),
+                    'name'  => 'meta_description',
+                    'desc'  => $this->l('Enter Your Category Meta Description for SEO'),
+                    'lang'  => true,
+                ],
+                [
+                    'type'  => 'tags',
+                    'label' => $this->l('Meta Keyword'),
+                    'name'  => 'meta_keywords',
+                    'desc'  => $this->l('Enter Your Category Meta Keyword for SEO. Seperate by comma(,)'),
+                    'lang'  => true,
+                ]
+            ],
             'submit' => [
                 'name' => 'slider',
                 'title' => $this->l('Save'), //On garde volontairement la traduction de l'admin par défaut
             ]
         ];
+
+        // Default, article is visible
+        if($this->object->id == 0)
+            $this->fields_value['active'] = 1;
+
         return parent::renderForm();
     }
 }

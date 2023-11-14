@@ -46,8 +46,9 @@ class Mdn_Blog extends Module implements WidgetInterface
     {
         $this->name = 'mdn_blog';
         $this->tab = 'seo';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'Loris Pinna';
+        $this->author_uri = 'https://lorispinna.com/';
         $this->need_instance = 0;
         $this->bootstrap = true;
         $this->displayName = $this->trans('MDN Blog', array(), 'Modules.Mdnblog.Mdnblog');
@@ -117,7 +118,7 @@ class Mdn_Blog extends Module implements WidgetInterface
                 'rule' =>        'blog/{slug}/{page:/}',
                 'keywords' => [
                     'slug' => [
-                        'regexp' => '[A-z0-9\-_]+',
+                        'regexp' => '([A-z0-9\-_])+',
                         'param' => 'slug',
                     ],
                     'page' => [
@@ -147,7 +148,18 @@ class Mdn_Blog extends Module implements WidgetInterface
                 'params' => array(
                     'fc' => 'module',
                     'module' => 'mdn_blog',
-                    'controller' => 'category',
+                    'controller' => 'article',
+                )
+            ),
+            'module-mdn_blog-sitemaps' => array(
+                'controller' =>  'sitemaps',
+                'rule' =>        'blog/sitemaps.xml',
+                'keywords' => [
+                ],
+                'params' => array(
+                    'fc' => 'module',
+                    'module' => 'mdn_blog',
+                    'controller' => 'sitemaps',
                 )
             ),
         ];
