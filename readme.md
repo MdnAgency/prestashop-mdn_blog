@@ -35,6 +35,15 @@ Nous avons décidé de créer un module open-source & performant, à la fois opt
 
 - **Tailles d'images configurables**
 
+
+- **Sitemaps généré pour le blog**
+
+  
+- **Programmation des posts**
+
+ 
+- **Multilangue**
+
 ### Installation
 1. Rendez-vous dans les Releases, pour télécharger la dernière version : [https://github.com/MdnAgency/prestashop-mdn_blog/releases/](https://github.com/MdnAgency/prestashop-mdn_blog/releases/)
 2. Uploadez l'archive sur votre Prestashop
