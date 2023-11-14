@@ -16,7 +16,7 @@ class AdminBlogArticleController extends ModuleAdminController
         $this->className = BlogArticleModel::class; //Classe de l'objet
         $this->bootstrap = true;
         $this->multiple_fieldsets = true;
-        $this->module->lang = true;
+        $this->lang = true;
         //Liste des champs de l'objet à afficher dans la liste
         $this->fields_list = [
             'id' => [
