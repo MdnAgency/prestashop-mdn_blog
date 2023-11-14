@@ -62,8 +62,7 @@ class BlogCategoryModel extends ObjectModel
             `meta_keywords` TEXT NOT NULL,
             PRIMARY KEY (`id`, `id_lang`) 
             ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
-
-
+ 
         $result = Db::getInstance()->execute($sq1)
             && Db::getInstance()->execute($sq3);
 
@@ -80,8 +79,8 @@ class BlogCategoryModel extends ObjectModel
                         0, $shop_id, $language, 'Home', 'home', 'Blog home category'
                     )");
                 }
-            }
-        }
+            }  
+        }  
         return $result;
     }
 

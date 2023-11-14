@@ -1,6 +1,8 @@
 <div class="text-center mb-3 mt-3">
-        <h1>{$article.name}</h1>
+    <h1>{$article.name}</h1>
+    <p>
         {$article.description nofilter}
+    </p>
     {if $article.thumbnail}
         <img class="blog-thumbail lazyload mt-5" data-src="{$article.thumbnail}" alt="{$article.name}"  >
     {/if}
